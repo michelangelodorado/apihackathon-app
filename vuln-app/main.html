@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #logoutButton {
+            padding: 8px;
+            background-color: #B22222;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 30px;
+        }
+
+        #container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 80px;
+        }
+
+        #itemContainer {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #datetimeContainer {
+            text-align: left;
+            margin-left: 30px;
+            font-size: 11px;
+        }
+
+        #profileContainer {
+            text-align: left;
+            font-size: 14px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 50px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            #container {
+                flex-direction: column;
+            }
+
+            #itemContainer {
+                max-width: 100%;
+            }
+        }
+
+        #currencyDropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
+
+        #currencyButton {
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            left: 0;
+        }
+
+        #currencyOptions {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 80px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        #currencyOptions a {
+            padding: 12px;
+            display: block;
+            text-decoration: none;
+            color: #333;
+        }
+
+        #currencyOptions a:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="banner">
+        <div id="datetimeContainer"></div>
+        <div><h1>Buy Ticket Online</h1></div>
+        <div id="currencyDropdown">
+            <button id="currencyButton">Currency (USD) ▼</button>
+            <div id="currencyOptions">
+                <a href="#" onclick="changeCurrency('USD')">USD</a>
+                <a href="#" onclick="changeCurrency('SGD')">SGD</a>
+                <a href="#" onclick="changeCurrency('PHP')">PHP</a>
+                <a href="#" onclick="changeCurrency('MYR')">MYR</a>
+                <a href="#" onclick="changeCurrency('IDR')">IDR</a>
+            </div>
+        </div>
+        <button id="logoutButton">Logout</button>
+        
+    </div>
+    
+    <div id="container">
+        <div id="profileContainer"></div>
+        <div id="itemContainer"></div>
+    </div>
+
+    <script>
+        const userID = '{{userID}}';
+        const sessionApiKey = '{{apikey}}';
+        let product;
+        let currencyCode = "USD";
+
+        async function fetchData(url, headers) {
+            const response = await fetch(url, { headers });
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        }
+
+        async function fetchUserProfile() {
+            try {
+                const profile = await fetchData(`/api/user/profile/${userID}`, { 'apikey': sessionApiKey });
+                document.getElementById('profileContainer').innerHTML = `
+                    <h1>My Profile</h1>
+                    <h2>${profile.firstname} ${profile.lastname}</h2>
+                    <p>Email: ${profile.email}</p>
+                    <p>Mobile: ${profile.phone}</p>
+                `;
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
+        }
+
+        async function fetchAccountList() {
+    try {
+        const response = await fetch('/accounts/list', {
+            method: 'GET', // You can adjust the method based on your backend API
+            headers: {
+                'Content-Type': 'application/json',
+                // You may need to include additional headers if required by your backend
+            },
+            // You can include credentials: 'include' if your backend uses cookies for authentication
+        });
+
+        if (!response.ok) {
+            // Handle non-successful responses here (e.g., server error)
+            throw new Error(`Error fetching account list: ${response.status}`);
+        }
+
+        const accountList = await response.json();
+        console.log('Account List:', accountList);
+        // Handle the accountList as needed (e.g., update UI)
+    } catch (error) {
+        console.error('Error fetching account list', error);
+    }
+}
+
+
+        async function fetchProductDetails() {
+    try {
+        // Fetch product data from the API
+        const products = await fetchData('/api/products', { 'apikey': sessionApiKey });
+        const product = products[0];
+
+        // Get the currency code
+        const currencyCode = getCurrencyCode();
+
+        // Send internal API call to Node.js
+        getConvertedPrice(product.name, currencyCode);
+
+    } catch (error) {
+        console.error('Error fetching product details:', error);
+    }
+}
+
+        async function getIPAddress() {
+            try {
+                const data = await fetchData('https://api64.ipify.org?format=json');
+                const ipAddress = data.ip;
+                console.log('Your IP address is ' + ipAddress);
+                getCurrentTime(ipAddress);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function getCurrentTime(ipAddress) {
+            try {
+                const data = await fetchData(`https://timeapi.io/api/Time/current/ip?ipAddress=${ipAddress}`);
+                const datetimeContainer = document.getElementById('datetimeContainer');
+                const paragraph = document.createElement('p');
+                paragraph.innerHTML = `Date: ${data.date}<br>Time: ${data.time} (${data.timeZone})`;
+                paragraph.style.textAlign = 'left';
+                datetimeContainer.appendChild(paragraph);
+            } catch (error) {
+                console.error('Error fetching current date and time:', error);
+            }
+        }
+
+        async function buy(itemName, itemPrice, currencyCode) {
+            console.log('Currency Code in buy function:', currencyCode);
+    const quantity = document.getElementById('quantity').value;
+    if (quantity > 4) {
+        alert("Quantity cannot exceed 4 per person");
+    } else {
+        try {
+            const response = await fetch('/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemName, currencyCode, quantity: parseInt(quantity) }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`You have purchased ${quantity} ${itemName}(s) for a total of ${currencyCode} ${itemPrice.toFixed(2)}`);
+            } else {
+                alert('Failed to add item to cart. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+}
+
+async function changeCurrency(newCurrencyCode) {
+    const currencyButton = document.getElementById('currencyButton');
+    currencyButton.textContent = `Currency (${newCurrencyCode}) ▼`;
+    const currencyOptions = document.getElementById('currencyOptions');
+    
+    try {
+        await fetchProductDetails();
+        // Fetch converted price for the selected currency
+        await getConvertedPrice(product.name, newCurrencyCode);
+
+        // Update the global variable
+        currencyCode = newCurrencyCode;
+
+        // Now, the convertedPrice and currencyCode should be available
+        updateProductDetails(product, convertedPrice, currencyCode);
+
+    } catch (error) {
+        console.error('Error fetching converted price:', error);
+    }
+}
+
+
+        function getCurrencyCode() {
+    const currencyButton = document.getElementById('currencyButton');
+    // Extract the currency code from the button text (assuming the format is "Currency (CODE) ▼")
+    const matches = currencyButton.textContent.match(/\(([^)]+)\)/);
+    return matches ? matches[1] : 'USD'; // Default to 'USD' if no match
+}
+
+async function getConvertedPrice(productName, currencyCode) {
+  try {
+    // Fetch converted price from the backend
+    const response = await fetch(`/convertcurrency`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productName, currencyCode }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching converted price. Network response was not ok. Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Handle the response or perform additional actions if needed
+    console.log('Converted price data:', data);
+
+    // Access product details and converted price from the response
+    const { product, convertedPrice } = data;
+
+    // Now you can use product and convertedPrice as needed in your frontend
+    console.log('Product Details:', product);
+    console.log('Converted Price:', convertedPrice);
+
+    // Example: Update HTML elements with the received data
+    updateProductDetails(product, convertedPrice, currencyCode);
+  } catch (error) {
+    console.error('Error fetching converted price:', error);
+  }
+}
+
+
+function updateProductDetails(product, convertedPrice, currencyCode) {
+    // Update HTML content based on received data
+    document.getElementById('itemContainer').innerHTML = `
+    <h2>${product.name}</h2>
+    <img src="${product.image}" alt="${product.name}">
+    <p>Price: ${convertedPrice.toFixed(2)} ${currencyCode}</p>
+    <p>Details: ${product.details}</p>
+    <p>When: ${product.date}</p>
+    <label for="quantity">Quantity (max of 4 per account):</label>
+    <input type="number" id="quantity" value="1" min="1" max="4">
+    <button onclick="buy('${product.name}', ${convertedPrice}, '${currencyCode}')">Buy</button>
+`;
+}
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout');
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Logout failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        document.getElementById('currencyButton').addEventListener('click', function () {
+            const currencyOptions = document.getElementById('currencyOptions');
+            currencyOptions.style.display = (currencyOptions.style.display === 'block') ? 'none' : 'block';
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("logoutButton").addEventListener("click", logout);
+        });
+
+        fetchUserProfile();
+        fetchAccountList();
+        getIPAddress();
+        fetchProductDetails();
+    </script>
+</body>
+</html>
