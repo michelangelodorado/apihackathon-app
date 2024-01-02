@@ -1,0 +1,139 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url("wallpaper.jpg");
+            background-size: cover; /* Ensure the background image covers the entire viewport */
+            background-color: #f4f4f4;
+            margin: 0;
+            height: 100vh; /* Set body height to full viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align to the top vertically */
+            align-items: center; /* Center horizontally */
+        }
+        #itemContainer {
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 33vh; /* Adjust margin to place it 2/3 vertically */
+            background-color: #fff; /* Set background color to hex 008CFF */
+            padding: 20px; /* Add padding for better visual appearance */
+            border-radius: 8px; /* Add border-radius for rounded corners */
+            color: black; /* Set text color to black */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        #loginForm {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            padding: 20px; /* Add padding for better visual appearance */
+            color: black; /* Set label text color to white */
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #24a0ed;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        footer {
+        position: fixed;
+        bottom: 5%;
+        width: 100%;
+        text-align: center;
+        padding: 10px; /* Add padding for better visual appearance */
+        }
+
+        /* Additional styling for the copyright text */
+        footer p {
+        margin: 0; /* Remove default margin */
+        color: white; /* Adjust text color */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="itemContainer">
+        <h1>{ Log In }</h1>
+        <form id="loginForm">
+            <input type="text" id="username" required placeholder="Username">
+            <input type="password" id="password" required placeholder="Password">
+            <button type="button" onclick="login()">Login</button>
+            <label for="signup">Not a member? <a href="#" onclick="redirectToSignup();"><strong>Sign up now</strong></a></label>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024; created for F5 Singapore API Hackathon</p>
+    </footer>
+
+    <script>
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Login successful!');
+
+            // Access the userID and apikey from the response
+            const userID = data.userID;
+            const apikey = data.apikey;
+
+            // Now you can use userID and apikey as needed
+            console.log('UserID:', userID);
+            console.log('API Key:', apikey);
+
+            // Redirect to the main page
+            window.location.href = '/main';
+        } else if (data.challenge) {
+            // Handle the specific case when challenges are present
+            console.log('Challenge:', data.challenge);
+            alert(data.challenge)
+            // Perform additional actions specific to challenges
+            // For example, redirect to the challenges page
+        } else {
+            // Handle other cases when login fails
+            alert('Login failed. Check your username and password.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
+
+        function redirectToSignup() {
+            window.location.href = '/signup';  // Redirect to the signup page
+        }
+    </script>
+</body>
+</html>
