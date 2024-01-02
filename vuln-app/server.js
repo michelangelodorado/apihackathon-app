@@ -9,7 +9,7 @@ const fs = require('fs');
 const cors = require('cors');
 const app = express();
 const PORT = 3000;
-const PORT2 = 8081;
+const PORT2 = 80;
 
 //DATABASE
 
