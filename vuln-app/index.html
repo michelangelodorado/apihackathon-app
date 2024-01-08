@@ -101,7 +101,7 @@ function login() {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
+        if (data.success && !data.flag_encoded) {
             alert('Login successful!');
 
             // Access the userID and apikey from the response
@@ -114,10 +114,10 @@ function login() {
 
             // Redirect to the main page
             window.location.href = '/main';
-        } else if (data.challenge) {
+        } else if (data.flag_encoded) {
             // Handle the specific case when challenges are present
-            console.log('Challenge:', data.challenge);
-            alert(data.challenge)
+            console.log('Challenge:', data.flag_encoded);
+            alert(data.flag_encoded)
             // Perform additional actions specific to challenges
             // For example, redirect to the challenges page
         } else {

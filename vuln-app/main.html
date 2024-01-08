@@ -174,7 +174,7 @@
 
         async function fetchUserProfile() {
             try {
-                const profile = await fetchData(`/api/user/profile/${userID}`, { 'apikey': sessionApiKey });
+                const profile = await fetchData(`/api/v1/user/profile/${userID}`, { 'apikey': sessionApiKey });
                 document.getElementById('profileContainer').innerHTML = `
                     <h1>My Profile</h1>
                     <h2>${profile.firstname} ${profile.lastname}</h2>
@@ -214,7 +214,7 @@
         async function fetchProductDetails() {
     try {
         // Fetch product data from the API
-        const products = await fetchData('/api/products', { 'apikey': sessionApiKey });
+        const products = await fetchData('/api/v1/products', { 'apikey': sessionApiKey });
         const product = products[0];
 
         // Get the currency code
