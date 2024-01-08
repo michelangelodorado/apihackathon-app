@@ -1,27 +1,19 @@
-# Use a multi-stage build for better efficiency
-FROM node:14 AS builder
+FROM node:14
 
+# Set the working directory inside the container
 WORKDIR /app
 
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
+
+# Install app dependencies
 RUN npm install
 
+# Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN npm run build
-
-# Start a new stage for the final image
-FROM node:14-alpine
-
-WORKDIR /app
-
-COPY --from=builder /app/dist /app
-COPY package*.json ./
-
-RUN npm install --only=production
-
+# Expose the port the app runs on
 EXPOSE 3000
 
+# Command to run the application
 CMD ["node", "server.js"]
-
