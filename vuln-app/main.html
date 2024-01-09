@@ -174,7 +174,7 @@
 
         async function fetchUserProfile() {
             try {
-                const profile = await fetchData(`/api/v1/user/profile/${userID}`, { 'apikey': sessionApiKey });
+                const profile = await fetchData(`/api/user/profile/${userID}`, { 'apikey': sessionApiKey });
                 document.getElementById('profileContainer').innerHTML = `
                     <h1>My Profile</h1>
                     <h2>${profile.firstname} ${profile.lastname}</h2>
@@ -188,7 +188,7 @@
 
         async function fetchAccountList() {
     try {
-        const response = await fetch('/accounts/list', {
+        const response = await fetch('/api/user/list', {
             method: 'GET', // You can adjust the method based on your backend API
             headers: {
                 'Content-Type': 'application/json',
@@ -253,7 +253,7 @@
         }
 
         async function buy(itemName, itemPrice, currencyCode) {
-            console.log('Currency Code in buy function:', currencyCode);
+       //     console.log('Currency Code in buy function:', currencyCode);
     const quantity = document.getElementById('quantity').value;
     if (quantity > 4) {
         alert("Quantity cannot exceed 4 per person");
@@ -266,7 +266,7 @@
             });
             const data = await response.json();
             if (data.success) {
-                alert(`You have purchased ${quantity} ${itemName}(s) for a total of ${currencyCode} ${itemPrice.toFixed(2)}`);
+                alert(`You have purchased ${quantity} ${itemName}(s) for ${currencyCode} ${itemPrice.toFixed(2)} each!`);
             } else {
                 alert('Failed to add item to cart. Please try again.');
             }
