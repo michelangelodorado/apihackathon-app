@@ -38,30 +38,17 @@ const users = [
 const accountID = users.map(user => {
   return {
     userID: user.userID,
-    firstname: user.firstname
+    firstname: user.firstname,
+    lastname: user.lastname
   };
 });
 
 const products = [
-  { id: 1, name: 'Elvis Live Ticket', price: 350.00, details: 'Live at Singapore Stadium!', date: 'March 1, 2024', image: 'https://i.etsystatic.com/10019178/r/il/93c0ad/5220800113/il_1588xN.5220800113_d8rs.jpg' },
-  { id: 2, name: 'Taylor Swift', price: 400.00, details: 'Live at Tokyo Stadium!', date: 'March 2, 2024', image: 'https://m.media-amazon.com/images/M/MV5BMmJlYWZmMzYtN2Y3OS00OTNkLTg2MzgtNjNkMTUyMzg0MTI3XkEyXkFqcGdeQXVyMzExODEzNDA@._V1_.jpg' },
+  { id: 1, name: 'Elvis Live!', price: 350.00, location: 'Singapore Stadium', date: 'March 1, 2024', image: 'https://static.stalbert.ca/site/assets/files/30066/elvis_732_x_300_pixels_300dpi_-_st_albert.-full.jpg' },
+  { id: 2, name: 'Taylor Swift Tour', price: 400.00, location: 'Tokyo Dome', date: 'Feb 9, 2024', image: 'https://m.media-amazon.com/images/M/MV5BMmJlYWZmMzYtN2Y3OS00OTNkLTg2MzgtNjNkMTUyMzg0MTI3XkEyXkFqcGdeQXVyMzExODEzNDA@._V1_.jpg' },
 ];
 
 const betaproducts = [{ id: 1, name: 'Beta Product 1', price: 25.00, details: 'This is a beta product!' }];
-
-//dummy
-const accounts = {
-  "u001": "Maki",
-  "u002": "Davies",
-  "u003": "Darryl",
-  "u004": "Frankie",
-  "u005": "Jok",
-  "u006": "Wendell",
-  "u007": "KY",
-};
-
-
-const cart = [];
 
 // Passport configuration...
 // ...
@@ -141,15 +128,20 @@ app.post('/login', (req, res, next) => {
 
 function checkCredentialsStuffing(username, password) {
   const Username = 'admin';
-  const Password = 'P@ssw0rd';
+  const Password = 'passw0rd';
   return username === Username && password === Password;
 }
 
+//TESTING
+app.get('/mainnew', (req, res) => res.sendFile(path.join(__dirname, 'mainnew.html')));
+app.get('/addproduct', (req, res) => res.sendFile(path.join(__dirname, 'addproduct.html')));
+
+
 app.get('/admin/v1', (req, res) => {
-  res.send(ctflag1);
+  res.json({ flag: `${ctflag1}` });
 });
 
-app.get('/admin/hidden/v3',  (req, res) => {
+app.get('/admin/product/add',  (req, res) => {
   // Check if the 'apikey' header is present and has the correct value
   const apiKeyHeader = req.headers['apikey'];
   const adminroleApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MDAxIiwibmFtZSI6Ik1ha2kiLCJyb2xlIjoiYWRtaW4ifQ.8OPLsjatk59WSBZk8tX07TZH2oxL4TO2rAWNdyG7wXk";
@@ -229,7 +221,7 @@ const checkApiKeyNoValidation = (req, res, next) => {
 
 app.get('/cart.html', (req, res) => res.sendFile(path.join(__dirname, 'cart.html')));
 
-app.get('/api/v1/user/profile/:userID', checkApiKey, (req, res) => {
+app.get('/api/user/profile/:userID', checkApiKey, (req, res) => {
   const userId = req.params.userID;
   const userWithoutPassword = users.find(u => u.userID === userId);
 
@@ -241,9 +233,20 @@ app.get('/api/v1/user/profile/:userID', checkApiKey, (req, res) => {
   }
 });
 
+app.get('/api/user/list', checkApiKey, (req, res) => {
+  res.json({ flag: `${ctflag8}`, accountID: accountID });
+});
+
 app.post('/import', async (req, res) => {
   try {
-    const { photoUrl } = req.body;
+    let { photoUrl } = req.body;
+
+    // Check if photoUrl starts with "http://" or "https://"
+    if (!photoUrl.startsWith('http://') && !photoUrl.startsWith('https://')) {
+      // If not, prepend "http://"
+      photoUrl = 'http://' + photoUrl;
+    }
+
     const url = new URL(photoUrl);
     const urlPort = parseInt(url.port, 10);
     const response = await fetch(photoUrl, { method: 'HEAD' });
@@ -259,6 +262,7 @@ app.post('/import', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.get('/api/v1/products', checkApiKeyNoValidation, (req, res) => res.json(products));
 
@@ -313,7 +317,7 @@ app.post('/signup', (req, res) => {
         }
     
         // Check if the body is valid JSON
-        if (Object.keys(req.body).length === 0 || !req.is('application/json')) {
+        if (Object.keys(req.body).length === 0 ) {
           return res.status(400).json({ error: 'Invalid JSON payload' });
         }
   
@@ -345,7 +349,7 @@ app.post('/signup', (req, res) => {
 
 // Function to fetch conversion rate from the external API
 async function fetchConversionRate(currencyCode) {
-  const conversionRateApiUrl = `http://currency-api:3001/api/convert/${currencyCode}`;
+  const conversionRateApiUrl = `http://currency-api:8080/api/convert/${currencyCode}`;
   const response = await fetch(conversionRateApiUrl);
 
   if (!response.ok) {
@@ -369,7 +373,6 @@ function handleBuyLogic(res, itemName, convertedPrice, quantity) {
     if (itemPrice === undefined || itemPrice === 0) {
       res.json({ success: true, flag: `${ctflag9}` });
     } else {
-      cart.push({ itemName, itemPrice, quantity });
       res.json({ success: true, convertedPrice });
     }
   } else if (quantity > 4) {
