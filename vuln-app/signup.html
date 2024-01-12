@@ -7,7 +7,7 @@
     <title>Sign Up Page</title>
     <style>
         body {
-            background-image: url("wallpaper.jpg");
+            background: url("wallpaper.jpg") no-repeat center center fixed;
             background-size: cover;
             background-color: #f4f4f4;
             font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@
             margin: 0;
             padding: 0;
         }
-    
+
         form {
             background-color: #fff;
             padding: 15px;
@@ -29,123 +29,91 @@
             width: 100%;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
-    
+
         h1 {
             text-align: center;
             margin-bottom: 15px;
         }
-    
+
         label {
             display: block;
             margin-bottom: 6px;
         }
-    
-        input[type="text"],
-        input[type="password"],
-        input[type="email"],
-        input#photoUrl {
-            width: 100%; /* Set width to 100% for full-width input */
+
+        input {
+            width: 100%;
             padding: 8px;
             margin-bottom: 10px;
             box-sizing: border-box;
             height: 38px;
         }
-        input#confirmPassword {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-    height: 38px;
-}
-    
+
         .photo-url-container {
             display: flex;
-            align-items: center; /* Align items vertically in the flex container */
+            align-items: center;
         }
-    
+
         #photoUrl {
             flex-grow: 1;
         }
-    
-        .import-photo {
-            background-color: #3498db;
+
+        .import-photo,
+        button {
+            background-color: #4caf50;
             color: #fff;
             padding: 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 8px; /* Add margin to separate button from the input field */
+            width: 100%;
             height: 38px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
         }
-    
-        button {
-    background-color: #4caf50;
-    color: #fff;
-    padding: 8px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    height: 38px;
-    margin-top: 10px;
-    transition: background-color 0.3s ease; /* Add transition for a smooth effect */
-}
 
-button:hover {
-    background-color: #45a049;
-}
-
-#backButton {
-    background-color: #3498db;
-    color: #fff;
-    padding: 8px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    height: 38px;
-    margin-top: 10px;
-    transition: background-color 0.3s ease; /* Add transition for a smooth effect */
-}
-
-#backButton:hover {
-    background-color: #2980b9;
-}
-    
-        button.import-photo:hover {
+        .import-photo:hover,
+        button:hover {
             background-color: #45a049;
         }
-    
+
+        #backButton {
+            background-color: #3498db;
+            transition: background-color 0.3s ease;
+        }
+
+        #backButton:hover {
+            background-color: #2980b9;
+        }
+
         #photoContainer {
             display: flex;
             justify-content: center;
             align-items: center;
             border: 1px solid #000;
-            width: 100%; /* Set width to 100% for responsiveness */
-            max-width: 202px; /* Set max-width for better scaling on larger screens */
+            width: 100%;
+            max-width: 202px;
             height: 202px;
             box-sizing: border-box;
             background-color: #ccc;
             margin-bottom: 10px;
         }
-    
+
         #importedPhoto {
-            max-width: 100%; /* Ensure the photo doesn't exceed the container size */
+            max-width: 100%;
             max-height: 100%;
         }
-    
+
         #result {
             color: red;
             margin-top: 10px;
         }
-            
     </style>
-    
+
 </head>
 
 <body>
 
-    <form action="/signup" method="post" onsubmit="return onSubmit()">
+    <form action="/signup" method="post" onsubmit="onSubmit(event)">
         <h1>Sign Up</h1>
 
         <div id="photoContainer">
@@ -159,7 +127,7 @@ button:hover {
         <input type="password" id="password" name="password" required>
 
         <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required>    
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
@@ -168,54 +136,44 @@ button:hover {
         <input type="text" id="photoUrl" placeholder="Enter photo URL">
         <div id="result"></div>
 
-        <button type="button" onclick="importPhoto()">Import</button>
+        <button type="button" onclick="importPhoto('/import')">Import</button>
         <button type="submit">Sign Up</button>
         <button id="backButton" onclick="goBack()">Back</button>
     </form>
 
-        
     <script>
+        const signupEndpoint = '/signup';
 
-function onSubmit(event) {
-    event.preventDefault(); // Prevent the default form submission
+        function onSubmit(event) {
+            event.preventDefault();
 
-    // Your form validation and data preparation logic here
-    const resultDiv = document.getElementById('result');
-    resultDiv.textContent = '';
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = '';
 
-    // Example: Sending form data as JSON to the server
-    const formData = {
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value,
-        email: document.getElementById('email').value,
-        // Add other form fields as needed
-    };
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                email: document.getElementById('email').value,
+            };
 
-    fetch('/signup', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+            fetch(signupEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
-        return response.json();
-    })
-    .then(data => {
-        // Handle the response from the server
-        console.log(data);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Handle other errors if needed
-    });
-}
 
-        function importPhoto() {
+        function importPhoto(importEndpoint) {
             const photoUrlInput = document.getElementById('photoUrl');
             const resultDiv = document.getElementById('result');
             const importedPhoto = document.getElementById('importedPhoto');
@@ -230,26 +188,23 @@ function onSubmit(event) {
 
             resultDiv.textContent = '';
 
-            fetch('/import', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ photoUrl }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    importedPhoto.src = data.photoUrl;
-                    photoContainer.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    resultDiv.textContent = 'An error occurred while importing the photo.';
-                });
+            fetch(importEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ photoUrl }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                importedPhoto.src = data.photoUrl;
+                photoContainer.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.textContent = 'An error occurred while importing the photo.';
+            });
         }
-
-
-
 
         function goBack() {
             window.location.href = '/login';
