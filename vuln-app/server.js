@@ -237,7 +237,7 @@ app.post('/import', async (req, res) => {
     const response = await fetch(photoUrl, { method: 'HEAD' });
     const statusCode = response.status;
 
-    if (statusCode === 200 && (url.hostname == 'localhost' || urlPort !== PORT)) {
+    if (statusCode === 200 && url.hostname == 'localhost' && urlPort !== PORT ) {
       res.json({ photoUrl, statusCode, flag: `${ctflag8}` });
     } else {
       res.json({ photoUrl, statusCode });
