@@ -167,15 +167,16 @@ function onSubmit(event) {
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        // Check for a success status or any other indicator in the response
-        if (data.success) {
+        if (data.message === 'User signed up successfully') {
             // Display an alert for successful sign-up
-            alert('User signed up successfully!');
+            const customMessage = "User signed up successfully, but you can't use it to login. Follow the CTFd Portal challenges instructions.";
+            alert(customMessage);
             // You may also redirect the user to another page after a successful signup
             // window.location.href = '/success-page';
         } else {
             // Handle other scenarios, e.g., display an error message
-            resultDiv.textContent = 'Sign-up failed. Please try again.';
+            const failedMessage = "Signup failed!";
+            alert(failedMessage);
         }
     })
     .catch(error => {
