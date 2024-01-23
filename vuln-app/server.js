@@ -294,7 +294,7 @@ app.post('/signup', (req, res) => {
 // Function to fetch conversion rate from the external API
 //Use currency-api if direct to container or api.convertusd.com if dns based 
 async function fetchConversionRate(currencyCode) {
-  const conversionRateApiUrl = `http://10.1.1.8:8080/api/convert/${currencyCode}`;
+  const conversionRateApiUrl = `http://api.convertusd.com:8080/api/convert/${currencyCode}`;
   const response = await fetch(conversionRateApiUrl);
 
   if (!response.ok) {
