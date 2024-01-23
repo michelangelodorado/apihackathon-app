@@ -144,35 +144,46 @@
     <script>
         const signupEndpoint = '/signup';
 
-        function onSubmit(event) {
-            event.preventDefault();
+function onSubmit(event) {
+    event.preventDefault();
 
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent = '';
+    const resultDiv = document.getElementById('result');
+    resultDiv.textContent = '';
 
-            const formData = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-                confirmPassword: document.getElementById('confirmPassword').value,
-                email: document.getElementById('email').value,
-            };
+    const formData = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        confirmPassword: document.getElementById('confirmPassword').value,
+        email: document.getElementById('email').value,
+    };
 
-            fetch(signupEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('User signed up successfully! But you can't use it to login.');
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+    fetch(signupEndpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        // Check for a success status or any other indicator in the response
+        if (data.success) {
+            // Display an alert for successful sign-up
+            alert('User signed up successfully!');
+            // You may also redirect the user to another page after a successful signup
+            // window.location.href = '/success-page';
+        } else {
+            // Handle other scenarios, e.g., display an error message
+            resultDiv.textContent = 'Sign-up failed. Please try again.';
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        resultDiv.textContent = 'An error occurred during the sign-up process.';
+    });
+}
+
 
         function importPhoto(importEndpoint) {
             const photoUrlInput = document.getElementById('photoUrl');
