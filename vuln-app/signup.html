@@ -166,6 +166,7 @@
             })
             .then(response => response.json())
             .then(data => {
+                alert('User signed up successfully! But you can't use it to login.');
                 console.log(data);
             })
             .catch(error => {
