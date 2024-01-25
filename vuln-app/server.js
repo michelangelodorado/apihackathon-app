@@ -237,11 +237,11 @@ app.post('/import', async (req, res) => {
     const response = await fetch(photoUrl, { method: 'HEAD' });
     const statusCode = response.status;
 
-    if (statusCode === 200 && url.hostname == 'localhost' && urlPort !== PORT ) {
+    if (statusCode === 200 && (url.hostname == 'localhost' || url.hostname == '127.0.0.1') && urlPort !== PORT ) {
       res.json({ photoUrl, statusCode, flag: `${ctflag8}` });
-    } else {
+      } else {
       res.json({ photoUrl, statusCode });
-    }
+      }
   } catch (error) {
     console.error('Error:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
